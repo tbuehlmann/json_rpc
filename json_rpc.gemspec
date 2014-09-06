@@ -5,8 +5,8 @@ Gem::Specification.new do |spec|
   spec.version       = JsonRpc::VERSION
   spec.authors       = ['Tobias Bühlmann']
   spec.email         = ['tobias@xn--bhlmann-n2a.de']
-  spec.summary       = 'TODO: Write a short summary. Required.'
-  spec.description   = 'TODO: Write a longer description. Optional.'
+  spec.summary       = 'JSON RPC 2.0 Rack Application Builder Library.'
+  spec.description   = 'json_rpc lets you build JSON RPC 2.0 aware Rack Applications.'
   spec.homepage      = 'https://github.com/tbuehlmann/json_rpc'
   spec.license       = 'MIT'
 
