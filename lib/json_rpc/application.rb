@@ -107,10 +107,3 @@ module JsonRpc
     end
   end
 end
-
-# - post oder nicht
-# - handler existenz
-# - json parsen
-# - array aus requests?
-#   - empty?
-# - request/s valide? (version, method, params, id)
