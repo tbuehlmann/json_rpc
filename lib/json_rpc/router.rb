@@ -41,6 +41,7 @@ module JsonRpc
         namespace(namespace) do
           routes[@path][@namespace] ||= []
           routes[@path][@namespace] << handler
+          routes[@path][@namespace].uniq!
         end
       end
     end

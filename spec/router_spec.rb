@@ -107,4 +107,104 @@ RSpec.describe JsonRpc::Router do
       expect(namespace).to eq('foo.bar')
     end
   end
+
+  describe '#routes' do
+    it 'is empty after init' do
+      expect(subject.routes).to be_empty
+    end
+  end
+
+  describe '#expose' do
+    let(:handler) { Class.new }
+    let(:routes) { subject.routes }
+
+    it 'exposes a handler object' do
+      subject.expose(handler)
+      expect(routes).to eq({'/' => {'' => [handler]}})
+    end
+
+    it 'exposes a handler object for a given route using the route method' do
+      handler = handler # local variable needed for the scope
+
+      subject.route('foo') do
+        expose(handler)
+      end
+
+      expect(routes).to eq({'/foo' => {'' => [handler]}})
+    end
+
+    it 'exposes a handler object for a given namespace using the namespace method' do
+      handler = handler # local variable needed for the scope
+
+      subject.namespace('foo') do
+        expose(handler)
+      end
+
+      expect(routes).to eq({'/' => {'foo' => [handler]}})
+    end
+
+    it 'exposes a handler object for a given route using the route option' do
+      subject.expose(handler, route: 'foo')
+      expect(routes).to eq({'/foo' => {'' => [handler]}})
+    end
+
+    it 'exposes a handler object for a given namespace using the namespace option' do
+      subject.expose(handler, namespace: 'foo')
+      expect(routes).to eq({'/' => {'foo' => [handler]}})
+    end
+
+    it 'exposes a handler object for a given route and namespace using methods and options' do
+      handler = handler # local variable needed for the scope
+
+      subject.route('foo') do
+        namespace('foo') do
+          expose(handler, route: 'bar', namespace: 'bar')
+        end
+      end
+
+      expect(routes).to eq({'/foo/bar' => {'foo.bar' => [handler]}})
+    end
+
+    it 'removes handler doubles from the routes' do
+      subject.expose(handler)
+      subject.expose(handler)
+
+      expect(routes['/']['']).to eq([handler])
+    end
+  end
+
+  describe '#handler_and_method_for_path_and_namespaced_method' do
+    let(:handler) do
+      Class.new do
+        include JsonRpc::Handler
+
+        def baz; end
+        expose :baz
+      end
+    end
+
+    let(:another_handler) do
+      Class.new do
+        include JsonRpc::Handler
+
+        def baz; end
+        expose :baz
+      end
+    end
+
+    it 'returns the correct handler and method for a given route and namespaced method' do
+      subject.expose(handler, route: 'foo', namespace: 'bar')
+      handler_and_method = subject.handler_and_method_for_path_and_namespaced_method('/foo', 'bar.baz')
+
+      expect(handler_and_method). to eq([handler, 'baz'])
+    end
+
+    it 'returns the first matching handler' do
+      subject.expose(handler, route: 'foo', namespace: 'bar')
+      subject.expose(another_handler, route: 'foo', namespace: 'bar')
+      handler_and_method = subject.handler_and_method_for_path_and_namespaced_method('/foo', 'bar.baz')
+
+      expect(handler_and_method). to eq([handler, 'baz'])
+    end
+  end
 end
