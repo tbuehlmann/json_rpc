@@ -73,6 +73,9 @@ module JsonRpc
           end
         rescue RequestError => error
           request.notification? ? nil : error.as_json
+        rescue StandardError => error
+          $stderr.puts(error.message, error.backtrace.join("\n"))
+          RequestError.new(code: -32603, message: 'Internal error', id: nil).as_json
         end
       else
         RequestError.new(code: -32600, message: 'Invalid Request').as_json
@@ -98,8 +101,12 @@ module JsonRpc
       end
 
       request.notification? ? nil : {jsonrpc: JSON_RPC_VERSION, result: result, id: request.id}
-    rescue ArgumentError
-      raise RequestError.new(code: -32602, message: 'Invalid params', id: nil)
+    rescue StandardError => error
+      if error.kind_of?(RequestError) || ['development', 'test'].include?(ENV['RACK_ENV'])
+        raise error
+      else
+        raise RequestError.new(code: -32603, message: 'Internal error', id: nil)
+      end
     end
 
     def handler_and_method_for_path_and_namespaced_method(path, namespaced_method)
