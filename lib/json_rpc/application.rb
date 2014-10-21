@@ -64,10 +64,10 @@ module JsonRpc
         begin
           request = Request.from_json(json_rpc_request)
           request.validate!
-          handler, method = handler_and_method_for_path_and_namespaced_method(@request.path, request.method)
+          handler, method_name = handler_and_method_for_path_and_namespaced_method(@request.path, request.method)
 
           if handler
-            invoke_handler(handler, method, request)
+            invoke_handler(handler, method_name, request)
           else
             raise RequestError.new(code: -32601, message: 'Method not found', id: nil)
           end
@@ -87,18 +87,10 @@ module JsonRpc
       responses.compact
     end
 
-    def invoke_handler(handler, method, request)
+    def invoke_handler(handler, method_name, request)
       handler = handler.new
       handler.json_rpc_request = request
-
-      result = case request.params
-      when Hash
-        handler.public_send(method, request.params)
-      when Array
-        handler.public_send(method, *request.params)
-      when NilClass
-        handler.public_send(method)
-      end
+      result = handler.invoke_method(method_name, request.params)
 
       request.notification? ? nil : {jsonrpc: JSON_RPC_VERSION, result: result, id: request.id}
     rescue StandardError => error

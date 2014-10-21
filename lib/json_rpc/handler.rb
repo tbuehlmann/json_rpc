@@ -44,5 +44,16 @@ module JsonRpc
     end
 
     attr_accessor :json_rpc_request
+
+    def invoke_method(method_name, params)
+      case params
+      when Hash
+        public_send(method_name, params)
+      when Array
+        public_send(method_name, *params)
+      when NilClass
+        public_send(method_name)
+      end
+    end
   end
 end
