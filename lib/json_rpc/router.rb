@@ -116,8 +116,8 @@ module JsonRpc
     end
 
     def sanitized_path(path)
-      path.start_with?('/') ? path : path.prepend('/')
       path.gsub!(/\/*\z/, '')
+      path.start_with?('/') ? path : path.prepend('/')
     end
   end
 end
