@@ -1,6 +1,6 @@
 # json_rpc
 
-json_rpc lets you build JSON RPC 2.0 aware Rack Applications.
+json_rpc lets you build [JSON RPC 2.0](http://www.jsonrpc.org/specification "JSON RPC 2.0") aware Rack Applications.
 
 ## Installation
 
